@@ -34,7 +34,7 @@ class Stack():
     def size(self):
         return len(self.stack)
 
-def allRoomsAroundSeen(roomID):
+def roomsSeen(roomID):
     for room in roomGraph[roomID][1].values():
         if room not in seenRooms:
             return False
@@ -64,7 +64,7 @@ def tryTracingBack():
 
             newPath.append(searchedRoom)
             paths[searchedRoom] = newPath
-            if not allRoomsAroundSeen(searchedRoom):
+            if not roomsSeen(searchedRoom):
                 correctPath = paths[searchedRoom]
                 directions = []
                 for i in range(len(correctPath) - 1):
@@ -83,7 +83,7 @@ seenRooms = set()
 
 currentRoom = 0
 while True:
-    while not allRoomsAroundSeen(currentRoom): 
+    while not roomsSeen(currentRoom): 
         
         currentRoom = unseenRoom(currentRoom) 
 
