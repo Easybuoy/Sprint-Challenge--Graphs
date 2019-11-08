@@ -9,7 +9,8 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 
-# roomGraph={0: [(3, 5), {'n': 1}], 1: [(3, 6), {'s': 0, 'n': 2}], 2: [(3, 7), {'s': 1}]}
+# roomGraph = {0: [(3, 5), {'n': 1}], 1: [
+#     (3, 6), {'s': 0, 'n': 2}], 2: [(3, 7), {'s': 1}]}
 # roomGraph={0: [(3, 5), {'n': 1, 's': 5, 'e': 3, 'w': 7}], 1: [(3, 6), {'s': 0, 'n': 2}], 2: [(3, 7), {'s': 1}], 3: [(4, 5), {'w': 0, 'e': 4}], 4: [(5, 5), {'w': 3}], 5: [(3, 4), {'n': 0, 's': 6}], 6: [(3, 3), {'n': 5}], 7: [(2, 5), {'w': 8, 'e': 0}], 8: [(1, 5), {'e': 7}]}
 # roomGraph={0: [(3, 5), {'n': 1, 's': 5, 'e': 3, 'w': 7}], 1: [(3, 6), {'s': 0, 'n': 2}], 2: [(3, 7), {'s': 1}], 3: [(4, 5), {'w': 0, 'e': 4}], 4: [(5, 5), {'w': 3}], 5: [(3, 4), {'n': 0, 's': 6}], 6: [(3, 3), {'n': 5, 'w': 11}], 7: [(2, 5), {'w': 8, 'e': 0}], 8: [(1, 5), {'e': 7}], 9: [(1, 4), {'n': 8, 's': 10}], 10: [(1, 3), {'n': 9, 'e': 11}], 11: [(2, 3), {'w': 10, 'e': 6}]}
 # roomGraph={0: [(3, 5), {'n': 1, 's': 5, 'e': 3, 'w': 7}], 1: [(3, 6), {'s': 0, 'n': 2, 'e': 12, 'w': 15}], 2: [(3, 7), {'s': 1}], 3: [(4, 5), {'w': 0, 'e': 4}], 4: [(5, 5), {'w': 3}], 5: [(3, 4), {'n': 0, 's': 6}], 6: [(3, 3), {'n': 5, 'w': 11}], 7: [(2, 5), {'w': 8, 'e': 0}], 8: [(1, 5), {'e': 7}], 9: [(1, 4), {'n': 8, 's': 10}], 10: [(1, 3), {'n': 9, 'e': 11}], 11: [(2, 3), {'w': 10, 'e': 6}], 12: [(4, 6), {'w': 1, 'e': 13}], 13: [(5, 6), {'w': 12, 'n': 14}], 14: [(5, 7), {'s': 13}], 15: [(2, 6), {'e': 1, 'w': 16}], 16: [(1, 6), {'n': 17, 'e': 15}], 17: [(1, 7), {'s': 16}]}
@@ -17,12 +18,82 @@ roomGraph={494: [(1, 8), {'e': 457}], 492: [(1, 20), {'e': 400}], 493: [(2, 5), 
 
 world.loadGraph(roomGraph)
 world.printRooms()
+world.startingRoom
 player = Player("Name", world.startingRoom)
 
+class Stack():
+    def __init__(self):
+        self.stack = []
+    def push(self, value):
+        self.stack.append(value)
+    def pop(self):
+        if self.size() > 0:
+            return self.stack.pop()
+        else:
+            return None
+    def size(self):
+        return len(self.stack)
+
+def roomsSeen(roomID):
+    for room in roomGraph[roomID][1].values():
+        if room not in seenRooms:
+            return False
+    return True
+
+def unseenRoom(roomID):
+    for direction, room in roomGraph[roomID][1].items():
+        if room not in seenRooms:
+            traversalPath.append(direction)
+            seenRooms.add(room)
+            return room
+
+def backTrackSteps():
+    visited = []
+    paths = {}
+    s = Stack()
+    s.push(currentRoom)
+    paths[currentRoom] = [currentRoom]
+    while s.size() > 0:
+        room = s.pop()
+        visited.append(room)
+        for searchedRoom in roomGraph[room][1].values():
+            if searchedRoom in visited:
+                continue
+
+            newPath = paths[room][:]
+
+            newPath.append(searchedRoom)
+            paths[searchedRoom] = newPath
+            if not roomsSeen(searchedRoom):
+                correctPath = paths[searchedRoom]
+                directions = []
+                for i in range(len(correctPath) - 1):
+                    for direction, value in roomGraph[correctPath[i]][1].items():
+                        if value == correctPath[i + 1]:
+                            directions.append(direction)
+                    seenRooms.add(correctPath[i + 1])
+                return (directions, correctPath[len(correctPath) - 1])
+            s.push(searchedRoom)
+    return None
 
 # FILL THIS IN
-traversalPath = ['n', 's']
+traversalPath = ['n', 's', 'e', 'w']
 
+seenRooms = set()
+
+currentRoom = 0
+while True:
+    while not roomsSeen(currentRoom): 
+        
+        currentRoom = unseenRoom(currentRoom) 
+
+    tracedValues = backTrackSteps() 
+    if tracedValues:
+        newPath = tracedValues[0]
+        traversalPath.extend(newPath)
+        currentRoom = tracedValues[1]
+    else:
+        break
 
 # TRAVERSAL TEST
 visited_rooms = set()
@@ -33,11 +104,11 @@ for move in traversalPath:
     visited_rooms.add(player.currentRoom)
 
 if len(visited_rooms) == len(roomGraph):
-    print(f"TESTS PASSED: {len(traversalPath)} moves, {len(visited_rooms)} rooms visited")
+    print(
+        f"TESTS PASSED: {len(traversalPath)} moves, {len(visited_rooms)} rooms visited")
 else:
     print("TESTS FAILED: INCOMPLETE TRAVERSAL")
     print(f"{len(roomGraph) - len(visited_rooms)} unvisited rooms")
-
 
 
 #######
