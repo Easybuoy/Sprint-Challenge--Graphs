@@ -47,7 +47,7 @@ def unseenRoom(roomID):
             seenRooms.add(room)
             return room
 
-def tryTracingBack():
+def backTrackSteps():
     visited = []
     paths = {}
     s = Stack()
@@ -87,7 +87,7 @@ while True:
         
         currentRoom = unseenRoom(currentRoom) 
 
-    tracedValues = tryTracingBack() 
+    tracedValues = backTrackSteps() 
     if tracedValues:
         newPath = tracedValues[0]
         traversalPath.extend(newPath)
