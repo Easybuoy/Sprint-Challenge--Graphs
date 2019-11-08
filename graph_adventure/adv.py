@@ -47,13 +47,7 @@ def unseenRoom(roomID):
             seenRooms.add(room)
             return room
 
-def roomDirection(currentRoom, roomValue):
-    for direction, value in roomGraph[currentRoom][1].items():
-        if value == roomValue:
-            return direction
-    return None
-
-def tryTracingBack(): # it's just a bfs
+def tryTracingBack():
     visited = []
     paths = {}
     s = Stack()
@@ -74,32 +68,26 @@ def tryTracingBack(): # it's just a bfs
                 correctPath = paths[searchedRoom]
                 directions = []
                 for i in range(len(correctPath) - 1):
-                    directions.append(roomDirection(correctPath[i], correctPath[i + 1]))
+                    for direction, value in roomGraph[correctPath[i]][1].items():
+                        if value == correctPath[i + 1]:
+                            directions.append(direction)
                     seenRooms.add(correctPath[i + 1])
                 return (directions, correctPath[len(correctPath) - 1])
             s.push(searchedRoom)
     return None
 
 # FILL THIS IN
-traversalPath = []
-# traversalPath = ['n', 's', 'e', 'w']
+traversalPath = ['n', 's', 'e', 'w']
 
 seenRooms = set()
-# add room 0 to seen_rooms 
-seenRooms.add(0)
-# travel using dft
+
 currentRoom = 0
 while True:
-    while not allRoomsAroundSeen(currentRoom): # checks if any room around hasn't been seen
-        # mark every room as seen_room
-        # add it to traversal path
-        currentRoom = unseenRoom(currentRoom) # goes into first unseen room around
-    # if no more rooms, loop back to the first room with other unseen rooms
-    # use bfs to get from the dead end to the room with unexplored rooms if we can
-    # mark every room it went throught as seen
+    while not allRoomsAroundSeen(currentRoom): 
+        
+        currentRoom = unseenRoom(currentRoom) 
 
-    tracedValues = tryTracingBack() # returns (directions it went back through, destination room) or None
-    # if can't trace back, don't add to path
+    tracedValues = tryTracingBack() 
     if tracedValues:
         newPath = tracedValues[0]
         traversalPath.extend(newPath)
